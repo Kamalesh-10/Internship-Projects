@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Posts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #fdfdfd;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    input, textarea {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #results {
+      border-top: 1px solid #ccc;
+      padding-top: 20px;
+    }
+    .post {
+      background: #f0f8ff;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .post-title {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Post Form</h1>
+
+  <label for="id">Id</label>
+  <input type="number" id="id" placeholder="Post Id">
+
+  <label for="title">Title</label>
+  <input type="text" id="title" placeholder="Post Title">
+
+  <label for="body">Body</label>
+  <textarea id="body" placeholder="Post Body"></textarea>
+
+  <label for="userId">User Id</label>
+  <input type="number" id="userId" placeholder="User Id">
+
+  <div class="buttons">
+    <button onclick="getPost()">Get</button>
+    <button onclick="getAllPosts()">Get All</button>
+    <button onclick="createPost()">Create</button>
+    <button onclick="updatePost()">Update</button>
+    <button onclick="deletePost()">Delete</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+    const resultsDiv = document.getElementById('results');
+
+    function getInput(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function displayPosts(posts) {
+      resultsDiv.innerHTML = '';
+      if (!Array.isArray(posts)) posts = [posts];
+      posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = 
+          <div class="post-title">${post.title}</div>
+          <div>${post.body}</div>
+          <small><strong>ID:</strong> ${post.id}, <strong>User ID:</strong> ${post.userId}</small>
+        ;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    async function getPost() {
+      const id = getInput('id');
+      if (!id) return alert('Please enter an ID.');
+      const res = await fetch(${API_URL}/${id});
+      const data = await res.json();
+      displayPosts(data);
+    }
+
+    async function getAllPosts() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      displayPosts(data.slice(0, 10)); // Limit to 10 for demo
+    }
+
+    async function createPost() {
+      const title = getInput('title');
+      const body = getInput('body');
+      const userId = getInput('userId');
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ title, body, userId })
+      });
+      const data = await res.json();
+      alert('Post created successfully');
+      displayPosts(data);
+    }
+
+    async function updatePost() {
+      const id = getInput('id');
+      const title = getInput('title');
+      const body = getInput('body');
+      const userId = getInput('userId');
+      const res = await fetch(${API_URL}/${id}, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, title, body, userId })
+      });
+      const data = await res.json();
+      alert('Post updated successfully');
+      displayPosts(data);
+    }
+
+    async function deletePost() {
+      const id = getInput('id');
+      if (!id) return alert('Please enter an ID to delete.');
+      await fetch(${API_URL}/${id}, { method: 'DELETE' });
+      alert(Post ${id} deleted.);
+      resultsDiv.innerHTML = '';
+    }
+  </script>
+
+</body>
+</html>

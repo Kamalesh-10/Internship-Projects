@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Application Form</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 30px;
+      background-color: rgb(183, 230, 30);
+    }
+    td[contenteditable="true"] {
+      background-color: #f5f1f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="table bg-light">
+<div class="container">
+  <h2 class="mb-4 " style="text-align: center;">Application Form</h2>
+  <form id="appForm">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>First Name:</label>
+        <input type="text" class="form-control" id="firstName" required>
+      </div>
+      <div class="form-group col-md-6">
+        <label>Last Name:</label>
+        <input type="text" class="form-control" id="lastName" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label>Date of Birth:</label>
+        <input type="date" class="form-control" id="dob" required>
+      </div>
+      <div class="form-group col-md-2">
+        <label>Age:</label>
+        <input type="number" class="form-control" id="age" required>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Gender:</label>
+        <select class="form-control" id="gender">
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group col-md-3">
+        <label>Email:</label>
+        <input type="email" class="form-control" id="email" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Position:</label><br>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" name="position" value="Junior Developer" required>
+        <label class="form-check-label">Junior Developer</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" name="position" value="Mid-level Developer">
+        <label class="form-check-label">Mid-level Developer</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="radio" class="form-check-input" name="position" value="Senior Developer">
+        <label class="form-check-label">Senior Developer</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Programming Languages:</label><br>
+      <div class="form-check form-check-inline">
+        <input type="checkbox" class="form-check-input" id="java" value="Java">
+        <label class="form-check-label">Java</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="checkbox" class="form-check-input" id="javascript" value="JavaScript">
+        <label class="form-check-label">JavaScript</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="checkbox" class="form-check-input" id="python" value="Python">
+        <label class="form-check-label">Python</label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>Password:</label>
+        <input type="password" class="form-control" id="password" required>
+      </div>
+      <div class="form-group col-md-6">
+        <label>Confirm Password:</label>
+        <input type="password" class="form-control" id="confirmPassword" required>
+      </div>
+    </div>
+    </form>
+    </div>
+    </div>
+
+   <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="reset" class="btn btn-secondary">Reset</button>
+  </form>
+
+  <hr>
+<div class="data bg-white" >
+  <h3>Stored Data</h3>
+  <table class="table table-bordered" id="dataTable">
+    <thead>
+      <tr>
+        <th>First</th><th>Last</th><th>DOB</th><th>Age</th><th>Gender</th><th>Email</th>
+        <th>Position</th><th>Languages</th><th>Password</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button class="btn btn-danger" onclick="clearTable()">Delete All Data</button>
+</div>
+
+<script>
+  const form = document.getElementById("appForm");
+  const tableBody = document.querySelector("#dataTable tbody");
+
+  const getData = () => JSON.parse(localStorage.getItem("applications") || "[]");
+  const saveData = data => localStorage.setItem("applications", JSON.stringify(data));
+
+  function renderTable() {
+    const data = getData();
+    tableBody.innerHTML = "";
+    data.forEach((item, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td contenteditable="false">${item.firstName}</td>
+        <td contenteditable="false">${item.lastName}</td>
+        <td contenteditable="false">${item.dob}</td>
+        <td contenteditable="false">${item.age}</td>
+        <td contenteditable="false">${item.gender}</td>
+        <td contenteditable="false">${item.email}</td>
+        <td contenteditable="false">${item.position}</td>
+        <td contenteditable="false">${item.languages.join(", ")}</td>
+        <td contenteditable="false">${item.password}</td>
+        <td><button class="btn btn-sm btn-warning" onclick="enableEdit(this, ${index})">Edit</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  function enableEdit(button, index) {
+    const row = button.closest("tr");
+    const cells = row.querySelectorAll("td[contenteditable]");
+    const isEditing = row.getAttribute("data-editing") === "true";
+
+    if (!isEditing) {
+      cells.forEach(cell => cell.setAttribute("contenteditable", "true"));
+      button.textContent = "Save";
+      row.setAttribute("data-editing", "true");
+    } else {
+      const updated = Array.from(cells).map(cell => cell.innerText.trim());
+      const updatedData = getData();
+      updatedData[index] = {
+        firstName: updated[0],
+        lastName: updated[1],
+        dob: updated[2],
+        age: updated[3],
+        gender: updated[4],
+        email: updated[5],
+        position: updated[6],
+        languages: updated[7].split(",").map(x => x.trim()),
+        password: updated[8]
+      };
+      saveData(updatedData);
+      location.reload();
+    }
+  }
+
+  function clearTable() {
+    localStorage.removeItem("applications");
+    location.reload();
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    const languages = [];
+    if (document.getElementById("java").checked) languages.push("Java");
+    if (document.getElementById("javascript").checked) languages.push("JavaScript");
+    if (document.getElementById("python").checked) languages.push("Python");
+
+    const position = document.querySelector('input[name="position"]:checked')?.value;
+
+    const entry = {
+      firstName: document.getElementById("firstName").value,
+      lastName: document.getElementById("lastName").value,
+      dob: document.getElementById("dob").value,
+      age: document.getElementById("age").value,
+      gender: document.getElementById("gender").value,
+      email: document.getElementById("email").value,
+      position,
+      languages,
+      password
+    };
+
+    const data = getData();
+    data.push(entry);
+    saveData(data);
+    location.reload();
+  });
+
+  window.onload = renderTable;
+</script>
+
+</body>
+</html>
